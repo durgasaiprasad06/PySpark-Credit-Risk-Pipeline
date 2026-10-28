@@ -1,28 +1,5 @@
 # PySpark Credit Risk Analysis Pipeline
 
-[![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/)
-[![Apache Spark](https://img.shields.io/badge/Apache%20Spark-PySpark-E25A1C.svg)](https://spark.apache.org/)
-[![Machine Learning](https://img.shields.io/badge/ML-Spark%20MLlib-brightgreen.svg)](https://spark.apache.org/mllib/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-
-An end-to-end, distributed Credit Risk Assessment and Default Prediction pipeline built with **Apache Spark (PySpark)** and **Spark MLlib**. The pipeline cleans raw credit data, performs automated exploratory data analysis (EDA), executes feature engineering through a unified Spark ML pipeline, trains and evaluates classification models (Logistic Regression & Random Forest), and persists model artifacts and test predictions.
-
----
-
-## Table of Contents
-1. [Project Overview](#project-overview)
-2. [Architecture & Pipeline Workflow](#architecture--pipeline-workflow)
-3. [Dataset Specification](#dataset-specification)
-4. [Data Preprocessing & Feature Engineering](#data-preprocessing--feature-engineering)
-5. [Model Training & Evaluation](#model-training--evaluation)
-6. [Visualizations & Exploratory Data Analysis](#visualizations--exploratory-data-analysis)
-7. [Directory Structure](#directory-structure)
-8. [Installation & Setup](#installation--setup)
-9. [How to Run](#how-to-run)
-10. [Pipeline Outputs & Persisted Artifacts](#pipeline-outputs--persisted-artifacts)
-11. [Code Review & Quality Assessment](#code-review--quality-assessment)
-
----
 
 ## Project Overview
 
@@ -156,39 +133,6 @@ Credit-Risk-Analysis/
     └── random_forest_model/         # Serialized PySpark Random Forest model
 ```
 
----
-
-## Installation & Setup
-
-### 1. Prerequisites
-- **Python**: Version `3.8` through `3.12`
-- **Java JDK**: OpenJDK `8`, `11`, or `17` (Required for PySpark execution)
-  - Verify Java installation:
-    ```bash
-    java -version
-    ```
-  - Ensure `JAVA_HOME` environment variable is configured.
-
-### 2. Virtual Environment Setup
-Clone the repository and set up a Python virtual environment:
-```bash
-git clone https://github.com/durgasaiprasad06/PySpark-Credit-Risk-Pipeline.git
-cd PySpark-Credit-Risk-Pipeline
-
-# Create virtual environment
-python -m venv venv
-
-# Activate virtual environment
-# Windows (PowerShell):
-.\venv\Scripts\Activate.ps1
-# Linux / macOS:
-source venv/bin/activate
-```
-
-### 3. Install Dependencies
-```bash
-pip install -r requirements.txt
-```
 
 ---
 
@@ -235,23 +179,3 @@ new_predictions = rf_model.transform(incoming_data_spark_df)
   - `probability`: Array string of class probabilities `[P(No Default), P(Default)]`
 
 ---
-
-## Code Review & Quality Assessment
-
-### Strengths
-- **Encapsulated Preprocessing**: Preprocessing stages (`Imputer`, `StringIndexer`, `OneHotEncoder`, `VectorAssembler`) are integrated directly into the `pyspark.ml.Pipeline` object with the classifier. This prevents data leakage and guarantees consistent transformations between training and inference.
-- **Fail-Safe Categorical Handling**: Both `StringIndexer` and `OneHotEncoder` utilize `handleInvalid="keep"`, ensuring that previously unseen categories do not trigger runtime failures during production inference.
-- **Clean Artifact Serialization**: Model checkpoints and scored test records (with probability vectors) are automatically written out with `.overwrite()` modes.
-- **Spark Log Suppression**: Using `spark.sparkContext.setLogLevel("ERROR")` suppresses noisy DAG execution logs, keeping the console output readable.
-
-### Recommended Future Enhancements
-1. **Outlier Filtering**: `person_age` contains extreme anomalies (e.g., maximum age 144 years) and `person_emp_length` (e.g., 123 years) that should ideally be filtered or capped using domain rules (e.g., `df.filter(col("person_age") <= 100)`).
-2. **Handling Class Imbalance**: The dataset contains an imbalanced ratio of defaults vs. non-defaults. Incorporating sample weighting via `weightCol` in Logistic Regression or threshold tuning on the probability vector can optimize recall for high-risk loan detection.
-3. **Hyperparameter Tuning**: Cross-validation (`pyspark.ml.tuning.CrossValidator`) and hyperparameter grid search (`ParamGridBuilder`) can be introduced to systematically optimize `numTrees`, `maxDepth`, and regularization parameters.
-4. **Scalable Plotting**: When dealing with multi-million row datasets, avoid invoking `toPandas()` on un-aggregated columns like `person_income`; instead, use PySpark's native `.sample()` or compute histogram bin counts inside Spark before collecting to Pandas.
-
----
-
-## Authors & Acknowledgments
-- **Author**: Tunga Durga Sai Prasad ([@durgasaiprasad06](https://github.com/durgasaiprasad06))
-- **Course Reference**: INT315 (Credit Risk Analysis & PySpark Pipeline)
